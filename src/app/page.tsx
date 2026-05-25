@@ -6,12 +6,15 @@ import { LessonLibrary } from "@/components/lessons/LessonLibrary";
 import { FlashcardSystem } from "@/components/flashcards/FlashcardSystem";
 import { GamificationDashboard } from "@/components/gamification/GamificationDashboard";
 import { DialectSelector } from "@/components/dialects/DialectSelector";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useTranslation } from "@/hooks/useTranslation";
 import { BookOpen, Brain, Trophy, MessageCircle, Settings } from "lucide-react";
 
 type View = "lessons" | "flashcards" | "progress" | "dialects" | "onboarding";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>("lessons");
+  const { t, language, setLanguage } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -22,7 +25,7 @@ export default function Home() {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">🇫🇮</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">SuomiAI</span>
+            <span className="font-bold text-xl text-gray-900">{t("appName")}</span>
           </div>
 
           <div className="space-y-2">
@@ -30,33 +33,34 @@ export default function Home() {
               active={currentView === "lessons"}
               onClick={() => setCurrentView("lessons")}
               icon={<BookOpen className="w-5 h-5" />}
-              label="Learn"
+              label={t("learn")}
             />
             <NavButton
               active={currentView === "flashcards"}
               onClick={() => setCurrentView("flashcards")}
               icon={<Brain className="w-5 h-5" />}
-              label="Flashcards"
+              label={t("flashcards")}
             />
             <NavButton
               active={currentView === "progress"}
               onClick={() => setCurrentView("progress")}
               icon={<Trophy className="w-5 h-5" />}
-              label="Progress"
+              label={t("progress")}
             />
             <NavButton
               active={currentView === "dialects"}
               onClick={() => setCurrentView("dialects")}
               icon={<MessageCircle className="w-5 h-5" />}
-              label="Dialects"
+              label={t("dialects")}
             />
           </div>
         </div>
 
-        <div className="mt-auto p-6 border-t border-gray-200">
+        <div className="mt-auto p-6 border-t border-gray-200 space-y-2">
+          <LanguageSwitcher language={language} onLanguageChange={setLanguage} />
           <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
             <Settings className="w-5 h-5" />
-            <span>Settings</span>
+            <span>{t("settings")}</span>
           </button>
         </div>
       </nav>
@@ -68,25 +72,25 @@ export default function Home() {
             active={currentView === "lessons"}
             onClick={() => setCurrentView("lessons")}
             icon={<BookOpen className="w-5 h-5" />}
-            label="Learn"
+            label={t("learn")}
           />
           <MobileNavButton
             active={currentView === "flashcards"}
             onClick={() => setCurrentView("flashcards")}
             icon={<Brain className="w-5 h-5" />}
-            label="Cards"
+            label={t("flashcards")}
           />
           <MobileNavButton
             active={currentView === "progress"}
             onClick={() => setCurrentView("progress")}
             icon={<Trophy className="w-5 h-5" />}
-            label="Progress"
+            label={t("progress")}
           />
           <MobileNavButton
             active={currentView === "dialects"}
             onClick={() => setCurrentView("dialects")}
             icon={<MessageCircle className="w-5 h-5" />}
-            label="Culture"
+            label={t("dialects")}
           />
         </div>
       </nav>
