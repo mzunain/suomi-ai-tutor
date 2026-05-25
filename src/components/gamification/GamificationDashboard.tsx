@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { Flame, Star, Target, Trophy, Zap, Calendar, TrendingUp } from 'lucide-react';
+import { DailyChallengePanel } from './DailyChallenge';
 
 interface UserStats {
   xp: number;
@@ -111,6 +112,11 @@ export function GamificationDashboard() {
             <BadgeCard key={badge.id} badge={badge} />
           ))}
         </div>
+      </div>
+
+      {/* Daily Challenges */}
+      <div className="mt-8">
+        <DailyChallengePanel />
       </div>
 
       {/* Weekly Activity */}
