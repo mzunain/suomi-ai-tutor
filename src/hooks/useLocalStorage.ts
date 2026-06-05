@@ -71,37 +71,34 @@ const defaultData: PersistedData = {
   timestamp: new Date().toISOString(),
 };
 
-export function useLocalStorage() {
-  const [data, setData] = useState<PersistedData>(defaultData);
-  const [isLoaded, setIsLoaded] = useState(false);
+function getInitialData(): PersistedData {
+  if (typeof window === 'undefined') return defaultData;
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Merge with defaults to handle schema updates
-        setData({ ...defaultData, ...parsed });
-      }
-    } catch (error) {
-      console.error('Failed to load from localStorage:', error);
-    }
-    setIsLoaded(true);
-  }, []);
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return defaultData;
+
+    const parsed = JSON.parse(stored);
+    return { ...defaultData, ...parsed };
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
+    return defaultData;
+  }
+}
+
+export function useLocalStorage() {
+  const [data, setData] = useState<PersistedData>(getInitialData);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
-    if (!isLoaded || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save to localStorage:', error);
     }
-  }, [data, isLoaded]);
+  }, [data]);
 
   const updateUser = useCallback((updates: Partial<PersistedData['user']>) => {
     setData(prev => ({
@@ -229,7 +226,7 @@ export function useLocalStorage() {
 
   return {
     data,
-    isLoaded,
+    isLoaded: true,
     updateUser,
     updateProgress,
     updateSettings,

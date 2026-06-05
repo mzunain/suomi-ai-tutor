@@ -258,11 +258,25 @@ interface Message {
   translation?: string;
 }
 
+type ScenarioId = 'cafe' | 'doctor' | 'work';
+
+function getInitialMessage(scenarioId: ScenarioId, suffix = '0'): Message {
+  const scenarioData = SCENARIOS.find((s) => s.id === scenarioId)!;
+  const first = scenarioData.steps[0];
+
+  return {
+    id: `ai-${suffix}`,
+    role: 'ai',
+    text: first.aiMessage,
+    translation: first.aiTranslation,
+  };
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ChatPractice() {
-  const [scenario, setScenario] = useState<'cafe' | 'doctor' | 'work'>('cafe');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [scenario, setScenario] = useState<ScenarioId>('cafe');
+  const [messages, setMessages] = useState<Message[]>(() => [getInitialMessage('cafe')]);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
@@ -274,17 +288,9 @@ export function ChatPractice() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scenarioData = SCENARIOS.find((s) => s.id === scenario)!;
 
-  // Initialise with first AI message whenever scenario changes
-  useEffect(() => {
-    const first = scenarioData.steps[0];
-    setMessages([
-      {
-        id: 'ai-0',
-        role: 'ai',
-        text: first.aiMessage,
-        translation: first.aiTranslation,
-      },
-    ]);
+  const resetScenario = (nextScenario: ScenarioId, suffix = '0') => {
+    setScenario(nextScenario);
+    setMessages([getInitialMessage(nextScenario, suffix)]);
     setCurrentStep(0);
     setSelectedOption(null);
     setScore({ correct: 0, total: 0 });
@@ -292,7 +298,7 @@ export function ChatPractice() {
     setIsComplete(false);
     setLastWasCorrect(null);
     setXpEarned(0);
-  }, [scenario]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -366,24 +372,7 @@ export function ChatPractice() {
   };
 
   const handleRestart = () => {
-    setScenario(scenario); // triggers useEffect
-    // Force re-initialise by toggling
-    const first = scenarioData.steps[0];
-    setMessages([
-      {
-        id: 'ai-0-restart',
-        role: 'ai',
-        text: first.aiMessage,
-        translation: first.aiTranslation,
-      },
-    ]);
-    setCurrentStep(0);
-    setSelectedOption(null);
-    setScore({ correct: 0, total: 0 });
-    setIsTyping(false);
-    setIsComplete(false);
-    setLastWasCorrect(null);
-    setXpEarned(0);
+    resetScenario(scenario, '0-restart');
   };
 
   const currentOptions =
@@ -424,7 +413,7 @@ export function ChatPractice() {
           {SCENARIOS.map((s) => (
             <button
               key={s.id}
-              onClick={() => setScenario(s.id)}
+              onClick={() => resetScenario(s.id)}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 scenario === s.id
                   ? 'bg-white text-slate-900'
@@ -541,7 +530,7 @@ export function ChatPractice() {
               <button
                 onClick={() => {
                   const nextId = scenario === 'cafe' ? 'doctor' : scenario === 'doctor' ? 'work' : 'cafe';
-                  setScenario(nextId);
+                  resetScenario(nextId);
                 }}
                 className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
               >

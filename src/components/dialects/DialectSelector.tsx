@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { MapPin, Volume2, BookOpen, MessageCircle } from 'lucide-react';
 

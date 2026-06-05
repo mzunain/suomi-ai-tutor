@@ -1,69 +1,84 @@
-# SuomiAI — Finnish Language Learning App
+# SuomiAI — Finnish Language Learning for Life in Finland
 
-> A competitive, feature-rich Finnish language tutor built with Next.js 16, deployed on Vercel.
+> AI-powered Finnish practice for immigrants and new residents: lessons, pronunciation, dialects, culture, and job-ready conversation practice.
 
-**Live:** [suomi-ai-tutor.vercel.app](https://suomi-ai-tutor.vercel.app)
+**Live demo:** [suomi-ai-tutor.vercel.app](https://suomi-ai-tutor.vercel.app)  
+**Release:** [v0.1.0](https://github.com/mzunain/suomi-ai-tutor/releases/tag/v0.1.0)
 
----
+![SuomiAI lesson library](docs/assets/suomiai-lessons.png)
 
-## Features
+## Why This Exists
 
-| Module | Details |
+Finnish is unusually hard for generic language apps: 15 grammatical cases, long agglutinative words, vowel harmony, and real dialect differences between places like Turku and Helsinki. For immigrants in Finland, language learning is not just vocabulary practice. It is job interviews, healthcare visits, workplace small talk, and understanding local culture.
+
+SuomiAI focuses on that exact gap: practical Finnish for integration, with AI-assisted pronunciation practice and local context instead of generic flashcards.
+
+## Product Highlights
+
+| Area | What is included |
 |---|---|
-| 📚 **Lesson Library** | 50+ lessons across A1–B2, Duolingo-style path view, Word of the Day, search & level filter |
-| ❤️ **Lesson Player** | 5-hearts lives system, multiple-choice & fill-in, green/red feedback bar, confetti on completion |
-| 🧠 **Flashcards** | SM-2 spaced repetition algorithm, category filter, flip animations |
-| 💬 **Chat Practice** | 8 real-world scenarios (café, doctor, workplace…), pick-a-response dialogue engine |
-| 🏆 **Gamification** | XP, levels, daily streaks, weekly leaderboard, achievement badges |
-| 🗺️ **Dialects & Culture** | Standard Finnish, Turku dialect, Helsinki slang + 6 cultural insight cards |
-| 🌐 **8-Language UI** | English, Finnish, Swedish, Arabic, Russian, Persian, Turkish, Somali |
-| 🔐 **Auth (WIP)** | Google OAuth + cloud progress sync via NextAuth + Prisma (PR #4) |
+| Lesson system | 53 lessons across A1-B2, search, level filters, lesson locks, word of the day |
+| Pronunciation | Browser recording flow, Finnish TTS playback, pronunciation scoring API route |
+| Dialects | Standard Finnish, Turku dialect, Helsinki slang, regional examples, cultural notes |
+| Practice | Scenario-based chat for cafe, doctor, and workplace conversations |
+| Retention | SM-2 flashcards, XP, levels, streaks, achievements, daily challenges |
+| Accessibility | 8-language UI: English, Finnish, Swedish, Arabic, Russian, Persian, Turkish, Somali |
+| Deployment | Next.js 16 App Router, Tailwind CSS v4, Vercel CI/CD |
 
----
+## Screenshots
+
+| Lessons | Dialects |
+|---|---|
+| ![Lesson library](docs/assets/suomiai-lessons.png) | ![Dialect selector](docs/assets/suomiai-dialects.png) |
+
+| Progress | Chat Practice |
+|---|---|
+| ![Gamification dashboard](docs/assets/suomiai-progress.png) | ![Chat practice](docs/assets/suomiai-chat.png) |
+
+## Direct Demo Links
+
+- [Lesson library](https://suomi-ai-tutor.vercel.app/?view=lessons)
+- [Progress dashboard](https://suomi-ai-tutor.vercel.app/?view=progress)
+- [Dialects and culture](https://suomi-ai-tutor.vercel.app/?view=dialects)
+- [Chat practice](https://suomi-ai-tutor.vercel.app/?view=chat)
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.2.2 (App Router, Turbopack)
-- **Styling**: Tailwind CSS v4, framer-motion
-- **Auth**: NextAuth v4 (Google OAuth)
-- **Database**: PostgreSQL via Prisma 7 (optional — app runs fully without it)
-- **Deployment**: Vercel (Frankfurt `fra1` region)
-- **CI/CD**: GitHub Actions → `vercel deploy --prod` on push to `main`
-
----
+- **Framework:** Next.js 16.2.2, App Router, Turbopack
+- **UI:** React 19, Tailwind CSS v4, framer-motion, lucide-react
+- **AI/Speech:** OpenAI Whisper-ready pronunciation API, Web Speech API playback
+- **Data:** Local-first progress storage, optional PostgreSQL via Prisma
+- **Auth:** NextAuth-ready Google OAuth path
+- **Deployment:** Vercel, Frankfurt `fra1`, GitHub Actions production deploys
 
 ## Getting Started
 
 ### Requirements
 
-- **Node.js >= 20.9.0** (use `nvm use 20` if you have nvm)
+- Node.js >= 20.9.0
 - npm 10+
 
-### Run locally
+### Run Locally
 
 ```bash
-# Install dependencies
 npm install --ignore-scripts
-
-# Start dev server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Build
+### Verify
 
 ```bash
+npm run lint
 npm run build
 ```
 
----
-
 ## Environment Variables
 
-The app runs without any env vars (database features gracefully degrade to stubs).
+The app runs without environment variables. Database-backed features gracefully fall back to local/demo behavior.
 
-To enable auth + cloud sync, create `.env.local`:
+To enable auth and cloud progress sync, create `.env.local`:
 
 ```env
 DATABASE_URL=postgresql://...
@@ -73,51 +88,39 @@ GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 ```
 
----
-
 ## Project Structure
 
-```
+```text
 src/
-├── app/                    # Next.js App Router pages & API routes
-│   ├── api/
-│   │   ├── auth/           # NextAuth handler
-│   │   ├── challenges/     # Daily challenges API
-│   │   └── pronunciation/  # Pronunciation API
-│   └── page.tsx            # Root layout with sidebar nav
+├── app/                    # Next.js App Router pages and API routes
 ├── components/
-│   ├── chat/               # ChatPractice — scenario dialogue engine
-│   ├── dialects/           # DialectSelector + cultural notes
-│   ├── flashcards/         # FlashcardSystem with SM-2 algorithm
-│   ├── gamification/       # GamificationDashboard (XP / leaderboard / achievements)
-│   ├── lessons/            # LessonLibrary + LessonPlayer
-│   ├── onboarding/         # OnboardingFlow
-│   └── ui/                 # Shared components (Button, Card, LanguageSwitcher…)
-├── data/
-│   └── lessons.ts          # 50+ lesson definitions
-├── hooks/
-│   └── useTranslation.ts   # i18n hook (8 languages, localStorage-backed)
-└── lib/
-    └── prisma.ts           # Null-safe Prisma client (stubs when no DATABASE_URL)
+│   ├── chat/               # Scenario dialogue practice
+│   ├── dialects/           # Dialect selector and cultural notes
+│   ├── flashcards/         # SM-2 flashcards
+│   ├── gamification/       # XP, streaks, leaderboard, achievements
+│   ├── lessons/            # Lesson library and lesson player
+│   ├── onboarding/         # Learner onboarding flow
+│   └── ui/                 # Shared UI primitives
+├── data/                   # Lessons and daily challenges
+├── hooks/                  # Local storage and i18n hooks
+└── lib/                    # Utilities and optional Prisma client
 ```
-
----
-
-## Deployment
-
-Push to `main` → GitHub Actions builds and deploys to Vercel automatically.
-
-Manual deploy:
-```bash
-VERCEL_ORG_ID=<org-id> VERCEL_PROJECT_ID=<project-id> npx vercel deploy --prod
-```
-
----
 
 ## Roadmap
 
-- [ ] Merge PR #4 — Google OAuth + cloud sync (needs `DATABASE_URL` set in Vercel)
-- [ ] Audio pronunciation (Web Speech API / TTS)
-- [ ] Grammar exercises with case drills
-- [ ] Offline PWA support
-- [ ] Mobile app (React Native / Expo)
+| Status | Work |
+|---|---|
+| Done | Lesson library, lesson player, flashcards, gamification, dialects, chat practice |
+| Done | Public repo polish: topics, live demo, release, screenshots, passing lint/build |
+| In progress | Google OAuth and cloud progress sync |
+| Next | Production Whisper scoring with real phoneme feedback |
+| Next | Grammar drills for Finnish cases and verb conjugation |
+| Future | Offline PWA mode and React Native / Expo mobile app |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, verification commands, and content guidelines.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

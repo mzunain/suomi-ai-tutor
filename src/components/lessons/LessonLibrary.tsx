@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
 import { sampleLessons } from '@/data/lessons';
 import { LessonPlayer } from '@/components/lessons/LessonPlayer';
 import { Lesson, DifficultyLevel } from '@/types';
@@ -21,6 +20,20 @@ import {
 
 const STORAGE_KEY = 'suomi-ai-tutor-data';
 const TOTAL_LESSONS = 53; // total in curriculum
+
+function getCompletedLessons(): string[] {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    return parsed?.progress?.completedLessons ?? [];
+  } catch {
+    return [];
+  }
+}
 
 // Seeded random for word of the day
 function seededRandom(seed: number): number {
@@ -313,7 +326,6 @@ function PathView({
         const locked = isLessonLocked(lesson, completedLessons);
         const isCurrent = !isCompleted && !locked;
 
-        const side = idx % 2 === 0 ? 'center' : 'center';
         const offsetClass = idx % 4 < 2 ? 'ml-0' : 'ml-16';
 
         return (
@@ -374,24 +386,10 @@ function PathView({
 
 export function LessonLibrary() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedLessons, setCompletedLessons] = useState<string[]>(getCompletedLessons);
   const [activeLevel, setActiveLevel] = useState<DifficultyLevel | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'path'>('grid');
-
-  // Load completed lessons from localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const completed: string[] = parsed?.progress?.completedLessons ?? [];
-        setCompletedLessons(completed);
-      }
-    } catch {
-      // silently ignore
-    }
-  }, []);
 
   const handleLessonComplete = (lessonId: string, results: { score: number; xp: number; timeSpent: number }) => {
     setCompletedLessons((prev: string[]) => {

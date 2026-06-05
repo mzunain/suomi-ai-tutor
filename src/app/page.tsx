@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { useState, useSyncExternalStore } from "react";
 import { LessonLibrary } from "@/components/lessons/LessonLibrary";
 import { FlashcardSystem } from "@/components/flashcards/FlashcardSystem";
 import { GamificationDashboard } from "@/components/gamification/GamificationDashboard";
@@ -12,6 +11,7 @@ import { BookOpen, Brain, Trophy, MessageCircle, Settings, Map, Flame } from "lu
 import { ChatPractice } from "@/components/chat/ChatPractice";
 
 type View = "lessons" | "flashcards" | "progress" | "dialects" | "chat" | "onboarding";
+const VIEWS: View[] = ["lessons", "flashcards", "progress", "dialects", "chat", "onboarding"];
 
 interface UserStats {
   xp: number;
@@ -20,6 +20,36 @@ interface UserStats {
 }
 
 const XP_PER_LEVEL = 300;
+const DEFAULT_USER_STATS: UserStats = { xp: 0, level: 1, streak: 0 };
+
+function getInitialView(): View {
+  if (typeof window === "undefined") return "lessons";
+
+  const view = new URLSearchParams(window.location.search).get("view");
+  return VIEWS.includes(view as View) ? (view as View) : "lessons";
+}
+
+function subscribeToUrlChanges() {
+  return () => {};
+}
+
+function getStoredUserStats(): UserStats {
+  if (typeof window === "undefined") return DEFAULT_USER_STATS;
+
+  try {
+    const stored = localStorage.getItem("suomi-ai-tutor-data");
+    if (!stored) return DEFAULT_USER_STATS;
+
+    const parsed = JSON.parse(stored);
+    return {
+      xp: parsed?.user?.xp ?? 0,
+      level: parsed?.user?.level ?? 1,
+      streak: parsed?.user?.streak ?? 0,
+    };
+  } catch {
+    return DEFAULT_USER_STATS;
+  }
+}
 
 function XPBar({ xp, level }: { xp: number; level: number }) {
   const xpInCurrentLevel = xp % XP_PER_LEVEL;
@@ -86,25 +116,11 @@ function StreakBadge({ streak }: { streak: number }) {
 }
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<View>("lessons");
+  const urlView = useSyncExternalStore(subscribeToUrlChanges, getInitialView, () => "lessons");
+  const [selectedView, setSelectedView] = useState<View | null>(null);
+  const currentView = selectedView ?? urlView;
   const { t, language, setLanguage } = useTranslation();
-  const [userStats, setUserStats] = useState<UserStats>({ xp: 0, level: 1, streak: 0 });
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("suomi-ai-tutor-data");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setUserStats({
-          xp: parsed?.user?.xp ?? 0,
-          level: parsed?.user?.level ?? 1,
-          streak: parsed?.user?.streak ?? 0,
-        });
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }, []);
+  const [userStats] = useState<UserStats>(getStoredUserStats);
 
   const navItems: { view: View; icon: React.ReactNode; label: string }[] = [
     { view: "lessons", icon: <BookOpen className="w-5 h-5" />, label: t("learn") },
@@ -146,7 +162,7 @@ export default function Home() {
             <NavButton
               key={view}
               active={currentView === view}
-              onClick={() => setCurrentView(view)}
+              onClick={() => setSelectedView(view)}
               icon={icon}
               label={label}
             />
@@ -172,7 +188,7 @@ export default function Home() {
             <MobileNavButton
               key={view}
               active={currentView === view}
-              onClick={() => setCurrentView(view)}
+              onClick={() => setSelectedView(view)}
               icon={icon}
               label={label}
             />

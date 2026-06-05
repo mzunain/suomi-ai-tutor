@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/Card';
 import { CheckCircle2, Clock, Zap } from 'lucide-react';
@@ -22,20 +22,18 @@ interface StoredProgress {
 export function DailyChallengePanel() {
   const today = new Date().toISOString().split('T')[0];
   const challenges = getDailyChallenges(today);
-  const [progress, setProgress] = useState<ChallengeProgress[]>(() =>
-    challenges.map((c) => ({ id: c.id, current: 0, completed: false }))
-  );
-
-  useEffect(() => {
+  const [progress, setProgress] = useState<ChallengeProgress[]>(() => {
     try {
       const stored: StoredProgress = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
       if (stored.date === today && stored.progress) {
-        setProgress(stored.progress);
+        return stored.progress;
       }
     } catch {
       // ignore
     }
-  }, [today]);
+
+    return challenges.map((c) => ({ id: c.id, current: 0, completed: false }));
+  });
 
   function saveProgress(next: ChallengeProgress[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, progress: next }));

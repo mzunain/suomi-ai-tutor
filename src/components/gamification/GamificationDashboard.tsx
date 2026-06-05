@@ -290,40 +290,42 @@ function WeeklyBarChart() {
 
 const TABS = ['My Progress', 'Leaderboard', 'Achievements'] as const;
 type Tab = typeof TABS[number];
+const DEFAULT_STATS: UserStats = {
+  xp: 1250,
+  streak: 7,
+  level: 5,
+  completedLessons: 15,
+};
+
+function getInitialStats(): UserStats {
+  if (typeof window === 'undefined') return DEFAULT_STATS;
+
+  try {
+    const raw = localStorage.getItem('suomi-ai-tutor-data');
+    if (!raw) return DEFAULT_STATS;
+
+    const parsed = JSON.parse(raw);
+    const user = parsed?.data?.user ?? parsed?.user;
+    const progress = parsed?.data?.progress ?? parsed?.progress;
+    if (!user) return DEFAULT_STATS;
+
+    return {
+      xp: user.xp ?? 1250,
+      streak: user.streak ?? 7,
+      level: user.level ?? 5,
+      completedLessons: progress?.completedLessons?.length ?? 15,
+    };
+  } catch {
+    return DEFAULT_STATS;
+  }
+}
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function GamificationDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('My Progress');
-  const [stats, setStats] = useState<UserStats>({
-    xp: 1250,
-    streak: 7,
-    level: 5,
-    completedLessons: 15,
-  });
+  const [stats] = useState<UserStats>(getInitialStats);
   const [countdown, setCountdown] = useState(msUntilNextSunday());
-
-  // Read from localStorage
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('suomi-ai-tutor-data');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const user = parsed?.data?.user ?? parsed?.user;
-        const progress = parsed?.data?.progress ?? parsed?.progress;
-        if (user) {
-          setStats({
-            xp: user.xp ?? 1250,
-            streak: user.streak ?? 7,
-            level: user.level ?? 5,
-            completedLessons: progress?.completedLessons?.length ?? 15,
-          });
-        }
-      }
-    } catch {
-      // use defaults
-    }
-  }, []);
 
   // Countdown ticker
   useEffect(() => {

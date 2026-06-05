@@ -13,7 +13,6 @@ import {
   RotateCcw,
   Check,
   Share2,
-  Heart,
 } from 'lucide-react';
 
 const MAX_HEARTS = 5;
@@ -306,7 +305,8 @@ export function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) 
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(() => Date.now());
+  const [completedTimeSpent, setCompletedTimeSpent] = useState(0);
   const [typedAnswer, setTypedAnswer] = useState('');
   const [hearts, setHearts] = useState(MAX_HEARTS);
   const [shakingHeart, setShakingHeart] = useState(false);
@@ -328,19 +328,16 @@ export function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) 
     }
   }, [currentExerciseIndex, showFeedback, currentExercise?.type]);
 
-  // Reset hint when exercise changes
-  useEffect(() => {
-    setShowHint(false);
-  }, [currentExerciseIndex]);
-
   const advance = useCallback(() => {
     setShowFeedback(false);
     setTypedAnswer('');
+    setShowHint(false);
     if (currentExerciseIndex < lesson.exercises.length - 1) {
       setCurrentExerciseIndex((i) => i + 1);
     } else {
       setIsCompleted(true);
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+      setCompletedTimeSpent(timeSpent);
       const correctCount = Object.values({ ...answers }).filter((a: { correct: boolean; attempts: number }) => a.correct).length;
       const score = Math.round((correctCount / lesson.exercises.length) * 100);
       onComplete?.({ score, xp: sessionXP, timeSpent });
@@ -404,6 +401,8 @@ export function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) 
     setIsCompleted(false);
     setTypedAnswer('');
     setHearts(MAX_HEARTS);
+    setStartTime(Date.now());
+    setCompletedTimeSpent(0);
     setOutOfHearts(false);
     setSessionXP(0);
     setShakingHeart(false);
@@ -420,7 +419,7 @@ export function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) 
       <LessonComplete
         lesson={lesson}
         answers={answers}
-        timeSpent={Math.floor((Date.now() - startTime) / 1000)}
+        timeSpent={completedTimeSpent}
         sessionXP={sessionXP}
         onExit={onExit}
       />

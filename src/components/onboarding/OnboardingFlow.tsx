@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { sampleLessons, assessmentQuestions } from "@/data/lessons";
+import { assessmentQuestions } from "@/data/lessons";
 import { DifficultyLevel, AssessmentResult } from "@/types";
 import { ArrowRight, Check, X } from "lucide-react";
 

@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { translations, Language } from '@/i18n/translations';
 
 const LANG_KEY = 'suomi-ui-language';
 
-export function useTranslation() {
-  const [language, setLanguageState] = useState<Language>('en');
+function getInitialLanguage(): Language {
+  if (typeof window === 'undefined') return 'en';
 
-  useEffect(() => {
-    const stored = localStorage.getItem(LANG_KEY) as Language | null;
-    if (stored && stored in translations) setLanguageState(stored);
-  }, []);
+  const stored = localStorage.getItem(LANG_KEY) as Language | null;
+  return stored && stored in translations ? stored : 'en';
+}
+
+export function useTranslation() {
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -45,7 +45,7 @@ export function PronunciationChecker({
     };
   }, [mediaRecorder]);
 
-  const startRecording = useCallback(async () => {
+  const startRecording = async () => {
     try {
       setError(null);
       setResult(null);
@@ -71,20 +71,20 @@ export function PronunciationChecker({
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
-    } catch (err) {
+    } catch {
       setError(
         "Microphone access denied. Please allow microphone access to use this feature.",
       );
     }
-  }, []);
+  };
 
-  const stopRecording = useCallback(() => {
+  const stopRecording = () => {
     if (mediaRecorder && mediaRecorder.state !== "inactive") {
       mediaRecorder.stop();
     }
     setIsRecording(false);
     setIsProcessing(true);
-  }, [mediaRecorder]);
+  };
 
   const processAudio = async (audioBlob: Blob) => {
     try {
@@ -118,7 +118,7 @@ export function PronunciationChecker({
         transcribed: result.transcribed,
         phonemeErrors: data.phonemeErrors || [],
       });
-    } catch (err) {
+    } catch {
       setError("Failed to process pronunciation. Please try again.");
       // Fallback: simulate result for demo
       simulateResult();
